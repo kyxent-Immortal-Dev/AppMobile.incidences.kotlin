@@ -7,4 +7,14 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    
+    <!-- Priority Colors -->
+    <color name="priority_high">#FFE53935</color>
+    <color name="priority_medium">#FFFFB300</color>
+    <color name="priority_low">#FF43A047</color>
+    
+    <!-- Status Colors -->
+    <color name="status_pending">#FF757575</color>
+    <color name="status_in_progress">#FF1E88E5</color>
+    <color name="status_completed">#FF43A047</color>
 </resources>

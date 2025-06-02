@@ -4,17 +4,19 @@ package com.example.incidencesapp.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.incidencesapp.R
 import com.example.incidencesapp.models.Incidence
 import com.example.incidencesapp.repository.IncidencesRepository
+import com.example.incidencesapp.ui.theme.AppIcons
 import com.example.incidencesapp.utils.SessionManager
 import com.example.incidencesapp.viewmodels.AuthViewModel
 import com.example.incidencesapp.viewmodels.IncidencesViewModel
@@ -85,35 +87,26 @@ fun HomeScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {
-                    Text(if (showAllIncidences) "Todas las Incidencias" else "Mis Incidencias")
-                },
+                title = { Text(stringResource(R.string.home_title)) },
                 actions = {
-                    IconButton(
-                        onClick = {
-                            showAllIncidences = !showAllIncidences
-                        }
-                    ) {
+                    IconButton(onClick = {
+                        sessionManager.clearSession()
+                        onNavigateToLogin()
+                    }) {
                         Icon(
-                            if (showAllIncidences) Icons.Default.Person else Icons.Default.People,
-                            contentDescription = if (showAllIncidences) "Ver mis incidencias" else "Ver todas"
+                            imageVector = AppIcons.Logout,
+                            contentDescription = null
                         )
-                    }
-                    IconButton(
-                        onClick = {
-                            authViewModel.logout()
-                        }
-                    ) {
-                        Icon(Icons.Default.ExitToApp, contentDescription = "Cerrar sesión")
                     }
                 }
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = onNavigateToCreate
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Crear incidencia")
+            FloatingActionButton(onClick = onNavigateToCreate) {
+                Icon(
+                    imageVector = AppIcons.Add,
+                    contentDescription = null
+                )
             }
         }
     ) { paddingValues ->
@@ -138,14 +131,14 @@ fun HomeScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Icon(
-                            Icons.Default.Description,
+                            imageVector = AppIcons.Description,
                             contentDescription = null,
                             modifier = Modifier.size(64.dp),
                             tint = MaterialTheme.colorScheme.outline
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = if (showAllIncidences) "No hay incidencias disponibles" else "No tienes incidencias creadas",
+                            text = stringResource(R.string.home_empty),
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -240,14 +233,14 @@ fun IncidenceCard(
                     Row {
                         IconButton(onClick = onEdit) {
                             Icon(
-                                Icons.Default.Edit,
+                                imageVector = AppIcons.Edit,
                                 contentDescription = "Editar",
                                 tint = MaterialTheme.colorScheme.primary
                             )
                         }
                         IconButton(onClick = onDelete) {
                             Icon(
-                                Icons.Default.Delete,
+                                imageVector = AppIcons.Delete,
                                 contentDescription = "Eliminar",
                                 tint = MaterialTheme.colorScheme.error
                             )
@@ -273,7 +266,7 @@ fun IncidenceCard(
                 Column {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
-                            Icons.Default.PriorityHigh,
+                            imageVector = AppIcons.PriorityHigh,
                             contentDescription = "Prioridad",
                             tint = priorityColor,
                             modifier = Modifier.size(16.dp)
@@ -291,7 +284,7 @@ fun IncidenceCard(
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
-                            Icons.Default.Schedule,
+                            imageVector = AppIcons.Schedule,
                             contentDescription = "Estado",
                             tint = statusColor,
                             modifier = Modifier.size(16.dp)

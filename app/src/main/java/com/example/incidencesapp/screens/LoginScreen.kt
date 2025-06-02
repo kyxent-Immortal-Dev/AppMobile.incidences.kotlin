@@ -3,23 +3,21 @@ package com.example.incidencesapp.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.incidencesapp.R
 import com.example.incidencesapp.repository.IncidencesRepository
+import com.example.incidencesapp.ui.theme.AppIcons
 import com.example.incidencesapp.utils.SessionManager
 import com.example.incidencesapp.viewmodels.AuthViewModel
 
@@ -61,94 +59,67 @@ fun LoginScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Bienvenido",
-            fontSize = 32.sp,
+            text = stringResource(R.string.login_title),
+            fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary
-        )
-
-        Text(
-            text = "Inicia sesión para continuar",
-            fontSize = 16.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(bottom = 32.dp)
         )
 
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
-            label = { Text("Email") },
-            leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true
+            label = { Text(stringResource(R.string.login_email)) },
+            leadingIcon = {
+                Icon(
+                    imageVector = AppIcons.Email,
+                    contentDescription = null
+                )
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
         )
-
-        Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text("Contraseña") },
-            leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
+            label = { Text(stringResource(R.string.login_password)) },
+            leadingIcon = {
+                Icon(
+                    imageVector = AppIcons.Lock,
+                    contentDescription = null
+                )
+            },
             trailingIcon = {
                 IconButton(onClick = { showPassword = !showPassword }) {
                     Icon(
-                        if (showPassword) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                        contentDescription = if (showPassword) "Ocultar contraseña" else "Mostrar contraseña"
+                        imageVector = if (showPassword) AppIcons.Visibility else AppIcons.VisibilityOff,
+                        contentDescription = null
                     )
                 }
             },
             visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 24.dp),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
-
-        uiState.error?.let { error ->
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
-            ) {
-                Text(
-                    text = error,
-                    color = MaterialTheme.colorScheme.onErrorContainer,
-                    modifier = Modifier.padding(16.dp)
-                )
-            }
-        }
-
         Button(
-            onClick = {
-                if (email.isNotBlank() && password.isNotBlank()) {
-                    viewModel.clearError()
-                    viewModel.login(email, password)
-                }
-            },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !uiState.isLoading && email.isNotBlank() && password.isNotBlank()
+            onClick = { viewModel.login(email, password) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp)
         ) {
-            if (uiState.isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(20.dp),
-                    color = MaterialTheme.colorScheme.onPrimary
-                )
-            } else {
-                Text("Iniciar Sesión")
-            }
+            Text(stringResource(R.string.login_button))
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
 
         TextButton(
             onClick = onNavigateToRegister,
-            enabled = !uiState.isLoading
+            modifier = Modifier.padding(top = 16.dp)
         ) {
-            Text("¿No tienes cuenta? Regístrate")
+            Text(stringResource(R.string.login_register))
         }
     }
 }

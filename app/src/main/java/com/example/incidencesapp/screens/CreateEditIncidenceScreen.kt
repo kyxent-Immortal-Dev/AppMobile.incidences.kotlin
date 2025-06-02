@@ -4,18 +4,19 @@ package com.example.incidencesapp.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.incidencesapp.R
 import com.example.incidencesapp.models.IncidenceRequest
 import com.example.incidencesapp.repository.IncidencesRepository
+import com.example.incidencesapp.ui.theme.AppIcons
 import com.example.incidencesapp.utils.SessionManager
 import com.example.incidencesapp.viewmodels.IncidencesViewModel
 import java.text.SimpleDateFormat
@@ -45,19 +46,14 @@ fun CreateEditIncidenceScreen(
     val priorities = listOf("Baja", "Media", "Alta")
     val statuses = listOf("Pendiente", "En Progreso", "Completado")
 
-    // Si es edición, cargar los datos de la incidencia
-    LaunchedEffect(incidenceId) {
-        if (isEditing && incidenceId != null) {
-            // Aquí deberías implementar la carga de la incidencia específica
-            // Por simplicidad, omitimos esta funcionalidad en este ejemplo
-        }
-    }
-
-    // Observar cambios en el estado para navegar de vuelta después de crear/editar
-    LaunchedEffect(uiState.incidences) {
-        if (!uiState.isLoading && uiState.error == null) {
-            // Si la operación fue exitosa, navegar de vuelta
-            // Este approach es simple, en una app real podrías usar un flag específico
+    // Si estamos editando, busca la incidencia en la lista y carga los datos
+    val incidenceToEdit = uiState.incidences.find { it._id == incidenceId }
+    LaunchedEffect(incidenceToEdit) {
+        incidenceToEdit?.let { incidence ->
+            title = incidence.title
+            description = incidence.description
+            priority = incidence.priority
+            status = incidence.status
         }
     }
 
@@ -69,7 +65,10 @@ fun CreateEditIncidenceScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
+                        Icon(
+                            imageVector = AppIcons.ArrowBack,
+                            contentDescription = null
+                        )
                     }
                 }
             )
@@ -85,26 +84,32 @@ fun CreateEditIncidenceScreen(
             OutlinedTextField(
                 value = title,
                 onValueChange = { title = it },
-                label = { Text("Título") },
-                leadingIcon = { Icon(Icons.Default.Title, contentDescription = null) },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                label = { Text(stringResource(R.string.incidence_title)) },
+                leadingIcon = {
+                    Icon(
+                        imageVector = AppIcons.Description,
+                        contentDescription = null
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
             )
-
-            Spacer(modifier = Modifier.height(16.dp))
 
             OutlinedTextField(
                 value = description,
                 onValueChange = { description = it },
-                label = { Text("Descripción") },
-                leadingIcon = { Icon(Icons.Default.Description, contentDescription = null) },
+                label = { Text(stringResource(R.string.incidence_description)) },
+                leadingIcon = {
+                    Icon(
+                        imageVector = AppIcons.Description,
+                        contentDescription = null
+                    )
+                },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(120.dp),
-                maxLines = 5
+                    .padding(bottom = 16.dp)
             )
-
-            Spacer(modifier = Modifier.height(16.dp))
 
             // Selector de Prioridad
             ExposedDropdownMenuBox(
@@ -115,8 +120,13 @@ fun CreateEditIncidenceScreen(
                     value = priority,
                     onValueChange = { },
                     readOnly = true,
-                    label = { Text("Prioridad") },
-                    leadingIcon = { Icon(Icons.Default.PriorityHigh, contentDescription = null) },
+                    label = { Text(stringResource(R.string.incidence_priority)) },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = AppIcons.PriorityHigh,
+                            contentDescription = null
+                        )
+                    },
                     trailingIcon = {
                         ExposedDropdownMenuDefaults.TrailingIcon(expanded = showPriorityDropdown)
                     },
@@ -152,8 +162,13 @@ fun CreateEditIncidenceScreen(
                     value = status,
                     onValueChange = { },
                     readOnly = true,
-                    label = { Text("Estado") },
-                    leadingIcon = { Icon(Icons.Default.Schedule, contentDescription = null) },
+                    label = { Text(stringResource(R.string.incidence_status)) },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = AppIcons.Schedule,
+                            contentDescription = null
+                        )
+                    },
                     trailingIcon = {
                         ExposedDropdownMenuDefaults.TrailingIcon(expanded = showStatusDropdown)
                     },
@@ -205,53 +220,58 @@ fun CreateEditIncidenceScreen(
                 }
             }
 
-            val isFormValid = title.isNotBlank() && description.isNotBlank()
+            val isFormValid = title.isNotBlank() && description.isNotBlank() && priority.isNotBlank() && status.isNotBlank()
 
-            Button(
-                onClick = {
-                    if (isFormValid) {
-                        val currentDate = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault()).format(Date())
-                        val incidenceRequest = IncidenceRequest(
-                            title = title,
-                            description = description,
-                            priority = priority,
-                            status = status,
-                            date = currentDate
-                        )
-
-                        if (isEditing && incidenceId != null) {
-                            viewModel.updateIncidence(incidenceId, incidenceRequest)
-                        } else {
-                            viewModel.createIncidence(incidenceRequest)
-                        }
-
-                        // Navegar de vuelta después de un delay para permitir que se complete la operación
-                        if (!uiState.isLoading) {
-                            onNavigateBack()
-                        }
-                    }
-                },
-                modifier = Modifier.fillMaxWidth(),
-                enabled = !uiState.isLoading && isFormValid
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                if (uiState.isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                        color = MaterialTheme.colorScheme.onPrimary
-                    )
-                } else {
-                    Text(if (isEditing) "Actualizar Incidencia" else "Crear Incidencia")
+                OutlinedButton(
+                    onClick = onNavigateBack,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(stringResource(R.string.incidence_cancel))
                 }
-            }
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.width(16.dp))
 
-            OutlinedButton(
-                onClick = onNavigateBack,
-                modifier = Modifier.fillMaxWidth(),
-                enabled = !uiState.isLoading
-            ) {
-                Text("Cancelar")
+                Button(
+                    onClick = {
+                        if (isFormValid) {
+                            val currentDate = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault()).format(Date())
+                            val incidenceRequest = IncidenceRequest(
+                                title = title,
+                                description = description,
+                                priority = priority,
+                                status = status,
+                                date = currentDate
+                            )
+
+                            if (isEditing && incidenceId != null) {
+                                viewModel.updateIncidence(incidenceId, incidenceRequest)
+                            } else {
+                                viewModel.createIncidence(incidenceRequest)
+                            }
+
+                            if (!uiState.isLoading) {
+                                onNavigateBack()
+                            }
+                        }
+                    },
+                    modifier = Modifier.weight(1f),
+                    enabled = !uiState.isLoading && isFormValid
+                ) {
+                    if (uiState.isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                    } else {
+                        Text(stringResource(R.string.incidence_save))
+                    }
+                }
             }
         }
     }
